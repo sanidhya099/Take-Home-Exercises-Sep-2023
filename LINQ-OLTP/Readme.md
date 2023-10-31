@@ -58,25 +58,118 @@ When processing data in the web form and implementing the required service metho
 ```csharp
 void Main()
 {
-	//  YOUR NAME HERE:
+	//  Sanidhya Sharma
 
 	#region Driver  //  3 Marks
 	try
 	{
-        //  The driver must, at minimum perform three different task. 
-        //  Task 1
-        //  -   Add a new employee and register their skills (minimun of two skills). 
-        	    
-        	    
-        //  Task 2 update an employee and their skill list. 
-        //  -   Updating their first or last name
-        //  -   Updating one existing skill
-        //  -   adding a minimum of one new skill
-        	    
-        	    
-        //  Task 3 attempts to register new skills with invalid data that will trigger all the business in this exercise
-        //  Refer to business rules for all test cases
-	    
+		//  The driver must, at minimum perform three different task. 
+		//  Task 1
+		//  -   Add a new employee and register their skills (minimun of two skills). 
+           EmployeeRegistrationView addNewEmployee = new EmployeeRegistrationView();
+		   addNewEmployee.EmployeeID = 4;
+		   addNewEmployee.FirstName = GenerateName(5);
+		   addNewEmployee.LastName = GenerateName(7);
+		   addNewEmployee.HomePhone = RandomPhoneNumber();
+		   addNewEmployee.Active = true;
+		   addNewEmployee.EmployeeSkills = new List<EmployeeSkillView>
+		  {
+			new EmployeeSkillView
+			{
+				SkillID = 3,
+				Level = 2,
+				YearsOfExperience = 3,
+				HourlyWage = 23.0m
+			},
+			new EmployeeSkillView
+			{
+				SkillID = 5,
+				Level = 3,
+				YearsOfExperience = 2,
+				HourlyWage = 20.0m
+			}
+		};
+		
+		addNewEmployee.Dump("New Emoloyee Add");
+		
+		EmployeeRegistrationView AfterAdd = AddEditEmployeeRegistration(addNewEmployee);
+		
+		Console.WriteLine("#################################");
+		
+		//  Task 2 update an employee and their skill list. 
+		//  -   Updating their first or last name
+		//  -   Updating one existing skill
+		//  -   adding a minimum of one new skill
+      
+    EmployeeRegistrationView ExistingEmployee = new EmployeeRegistrationView();
+	ExistingEmployee.FirstName = GenerateName(4);
+	ExistingEmployee.LastName = GenerateName(7);
+	ExistingEmployee.HomePhone = RandomPhoneNumber();
+	ExistingEmployee.Active = true;
+	ExistingEmployee.EmployeeSkills = new List<EmployeeSkillView>
+	{
+		new EmployeeSkillView
+		{
+			EmployeeSkillID = 5,
+			SkillID = 3,
+			Level = 2,
+			YearsOfExperience = 2,
+			HourlyWage = 23.0m
+		},
+		new EmployeeSkillView
+		{
+			EmployeeSkillID = 4,
+			SkillID = 5,
+			Level = 2,
+			YearsOfExperience = 2,
+			HourlyWage = 20.0m
+		},
+		new EmployeeSkillView
+		{
+			EmployeeSkillID = 6,
+			SkillID = 3,
+			Level = 3,
+			YearsOfExperience = 3,
+			HourlyWage = 25.0m
+		}
+		
+	};
+	
+	ExistingEmployee.Dump("Updated Successfully");
+	
+	EmployeeRegistrationView afterEdit  = AddEditEmployeeRegistration(ExistingEmployee);
+	
+	Console.WriteLine("#####################################");
+	
+		  
+		//  Task 3 attempts to register new skills with invalid data that will trigger all the business in this exercise
+		//  Refer to business rules for all test cases
+        
+		 EmployeeRegistrationView InvalidEmployee = new EmployeeRegistrationView
+		 {
+		 	FirstName = "",
+			LastName = "Sharma",
+			HomePhone ="555-555-555",
+			Active = true,
+			EmployeeSkills = new List<EmployeeSkillView>
+			{
+				new EmployeeSkillView
+				{
+					SkillID = 3,
+					Level = -2,
+					YearsOfExperience = 200,
+					HourlyWage = 34.0m
+					
+				}
+			}
+			
+		 };
+		 
+	AddEditEmployeeRegistration(InvalidEmployee);
+	EmployeeRegistrationView Correction = AddEditEmployeeRegistration(InvalidEmployee);
+		
+		 Console.WriteLine("_______________________________________");
+
 	}
 	#endregion
 
@@ -114,31 +207,82 @@ public EmployeeRegistrationView AddEditEmployeeRegistration(EmployeeRegistration
 {
 	// --- Business Logic and Parameter Exception Section --- 
 	#region Business Logic and Parameter Exception  //  2 Marks
+	List<Exception> errorList = new List<Exception>();
+
+	if (string.IsNullOrWhiteSpace(employeeRegistration.FirstName))
+	{
+		throw new ArgumentNullException("First name  Must be Filled.");
+	}
 
 
+	if (string.IsNullOrWhiteSpace(employeeRegistration.LastName))
+	{
+		throw new ArgumentNullException("Last name Must be filled.");
+	}
+
+	if (string.IsNullOrWhiteSpace(employeeRegistration.HomePhone))
+	{
+		throw new ArgumentNullException("Home Phone is a Mandatory field.");
+	}
+
+	if (employeeRegistration.EmployeeSkills == null || employeeRegistration.EmployeeSkills.Count == 0)
+	{
+		throw new ArgumentException("At least Add one new level Skill.");
+	}
+
+
+
+	#endregion
 	#endregion
 
 	// --- Main Method Logic Section --- 
 	#region Method Code //  3 Marks
 
 	// Actual logic to add or edit data in the database goes here. 
+	employeeRegistration.Active = true;
+
+	foreach (var skill in employeeRegistration.EmployeeSkills)
+	{
+		if (skill.Level <= 0)
+		{
+			throw new ArgumentException("valid 'Level' is required.");
+		}
+
+		if (skill.YearsOfExperience.HasValue)
+		{
+			if (skill.YearsOfExperience < 1 || skill.YearsOfExperience > 50)
+			{
+				throw new ArgumentException("Years of Experience(YOE) must be between 1 and 50.");
+			}
+		}
+
+		if (skill.HourlyWage <= 0 || skill.HourlyWage < 15.00m || skill.HourlyWage > 100.00m)
+		{
+			throw new ArgumentException("Hourly Wage must be within the range of $15.00 to $100.00.");
+		}
+	}
+
 
 	#endregion
 
 	#region Check for errors and saving of data //  1 Marks
 
 	// --- Error handling and saving
+	if (errorList.Count() > 0)
+	{
+		throw new AggregateException("Unable to proceed!  Check concerns", errorList);
+	}
+	#endregion
 
-	#endregion		
 	return null;
 }
 #endregion
 
 #region GetEmployeeRegistration Method    //  1 Marks
-//  your code here
+//
 #endregion
 
-#endregion
+
 
 /// <summary> 
 /// Contains class definitions that are referenced in the current LINQ file. 
@@ -239,6 +383,7 @@ public static string GenerateName(int len)
 	return Name;
 }
 #endregion
+
 ```
 ---
 
